@@ -1,11 +1,11 @@
-import { ObjectId } from "mongodb";
+import { ObjectId } from "mongodb"
 
-import { logger } from "../../services/logger.service.js";
-import { makeId } from "../../services/util.service.js";
-import { dbService } from "../../services/db.service.js";
-import { asyncLocalStorage } from "../../services/als.service.js";
+import { logger } from "../../services/logger.service.js"
+import { makeId } from "../../services/util.service.js"
+import { dbService } from "../../services/db.service.js"
+import { asyncLocalStorage } from "../../services/als.service.js"
 
-const PAGE_SIZE = 3;
+const PAGE_SIZE = 3
 
 export const stayService = {
   remove,
@@ -15,42 +15,42 @@ export const stayService = {
   update,
   addStayMsg,
   removeStayMsg,
-};
+}
 
 async function query(filterBy = {}) {
-  console.log(filterBy);
+  console.log(filterBy)
 
   try {
-    const criteria = _buildCriteria(filterBy);
-    const sort = _buildSort(filterBy);
+    const criteria = _buildCriteria(filterBy)
+    const sort = _buildSort(filterBy)
 
-    const collection = await dbService.getCollection("stay");
-    var stayCursor = await collection.find(criteria, { sort });
+    const collection = await dbService.getCollection("stay")
+    var stayCursor = await collection.find(criteria, { sort })
 
     if (filterBy.pageIdx !== undefined) {
-      stayCursor.skip(filterBy.pageIdx * PAGE_SIZE).limit(PAGE_SIZE);
+      stayCursor.skip(filterBy.pageIdx * PAGE_SIZE).limit(PAGE_SIZE)
     }
 
-    const stays = await stayCursor.toArray();
-    return stays;
+    const stays = await stayCursor.toArray()
+    return stays
   } catch (err) {
-    logger.error("cannot find stays", err);
-    throw err;
+    logger.error("cannot find stays", err)
+    throw err
   }
 }
 
 async function getById(stayId) {
   try {
-    const criteria = { _id: stayId };
+    const criteria = { _id: stayId }
 
-    const collection = await dbService.getCollection("stay");
-    const stay = await collection.findOne(criteria);
+    const collection = await dbService.getCollection("stay")
+    const stay = await collection.findOne(criteria)
 
     //stay.createdAt = stay._id.getTimestamp()
-    return stay;
+    return stay
   } catch (err) {
-    logger.error(`while finding stay ${stayId}`, err);
-    throw err;
+    logger.error(`while finding stay ${stayId}`, err)
+    throw err
   }
 }
 
@@ -60,119 +60,131 @@ async function remove(stayId) {
       _id: stayId,
     };
 
-    const collection = await dbService.getCollection("stay");
-    const res = await collection.deleteOne(criteria);
+    const collection = await dbService.getCollection("stay")
+    const res = await collection.deleteOne(criteria)
 
-    if (res.deletedCount === 0) throw "Stay not found";
-    return stayId;
+    if (res.deletedCount === 0) throw "Stay not found"
+    return stayId
   } catch (err) {
-    logger.error(`cannot remove stay ${stayId}`, err);
-    throw err;
+    logger.error(`cannot remove stay ${stayId}`, err)
+    throw err
   }
 }
 
 async function add(stay) {
   try {
-    const collection = await dbService.getCollection("stay");
-    await collection.insertOne(stay);
+    const collection = await dbService.getCollection("stay")
+    await collection.insertOne(stay)
 
-    return stay;
+    return stay
   } catch (err) {
-    logger.error("cannot insert stay", err);
-    throw err;
+    logger.error("cannot insert stay", err)
+    throw err
   }
 }
 
 async function update(stay) {
-  const stayToSave = { vendor: stay.vendor, speed: stay.speed };
+  const stayToSave = { vendor: stay.vendor, speed: stay.speed }
 
   try {
-    const criteria = { _id: stay._id };
-    const collection = await dbService.getCollection("stay");
-    await collection.updateOne(criteria, { $set: stayToSave });
+    const criteria = { _id: stay._id }
+    const collection = await dbService.getCollection("stay")
+    await collection.updateOne(criteria, { $set: stayToSave })
 
-    return stay;
+    return stay
   } catch (err) {
-    logger.error(`cannot update stay ${stay._id}`, err);
-    throw err;
+    logger.error(`cannot update stay ${stay._id}`, err)
+    throw err
   }
 }
 
 async function addStayMsg(stayId, msg) {
   try {
-    const criteria = { _id: stayId };
-    msg.id = makeId();
+    const criteria = { _id: stayId }
+    msg.id = makeId()
 
-    const collection = await dbService.getCollection("stay");
-    await collection.updateOne(criteria, { $push: { msgs: msg } });
+    const collection = await dbService.getCollection("stay")
+    await collection.updateOne(criteria, { $push: { msgs: msg } })
 
-    return msg;
+    return msg
   } catch (err) {
-    logger.error(`cannot add stay msg ${stayId}`, err);
-    throw err;
+    logger.error(`cannot add stay msg ${stayId}`, err)
+    throw err
   }
 }
 
 async function removeStayMsg(stayId, msgId) {
   try {
-    const criteria = { _id: stayId };
+    const criteria = { _id: stayId }
 
     const collection = await dbService.getCollection("stay");
-    await collection.updateOne(criteria, { $pull: { msgs: { id: msgId } } });
+    await collection.updateOne(criteria, { $pull: { msgs: { id: msgId } } })
 
     return msgId;
   } catch (err) {
-    logger.error(`cannot remove stay msg ${stayId}`, err);
-    throw err;
+    logger.error(`cannot remove stay msg ${stayId}`, err)
+    throw err
   }
 }
 
 function _buildCriteria(filterBy) {
-  const criteria = {};
+  const criteria = {}
 
   if (filterBy.txt) {
-    criteria.name = { $regex: filterBy.txt, $options: "i" };
+    criteria.name = { $regex: filterBy.txt, $options: "i" }
   }
 
   if (filterBy.city) {
-    criteria["loc.city"] = { $regex: filterBy.city, $options: "i" };
+    criteria["loc.city"] = { $regex: filterBy.city, $options: "i" }
   }
 
   if (filterBy.bathrooms !== undefined) {
-    criteria.bathrooms = { $gte: +filterBy.bathrooms };
+    criteria.bathrooms = { $gte: +filterBy.bathrooms }
   }
 
   if (filterBy.bedrooms !== undefined) {
-    criteria.bedrooms = { $gte: +filterBy.bedrooms };
+    criteria.bedrooms = { $gte: +filterBy.bedrooms }
   }
 
   if (filterBy.minPrice !== undefined || filterBy.maxPrice !== undefined) {
     criteria.price = {};
     if (filterBy.minPrice !== undefined)
-      criteria.price.$gte = +filterBy.minPrice;
+      criteria.price.$gte = +filterBy.minPrice
     if (filterBy.maxPrice !== undefined)
-      criteria.price.$lte = +filterBy.maxPrice;
+      criteria.price.$lte = +filterBy.maxPrice
   }
 
-  if (filterBy.capacity !== undefined) {
-    criteria.capacity = { $gte: +filterBy.capacity };
+//   if (filterBy.capacity !== undefined) {
+//     criteria.capacity = { $gte: +filterBy.capacity }
+//   }
+
+  if (filterBy.guests) {
+    const totalGuests = (filterBy.guests.adults || 0) + (filterBy.guests.children || 0)
+    if (totalGuests > 0) {
+      criteria.capacity = { $gte: totalGuests }
+    }
   }
 
   if (filterBy.roomType) {
-    criteria.roomType = filterBy.roomType;
+    criteria.roomType = filterBy.roomType
   }
 
   if (filterBy.labels && filterBy.labels.length > 0) {
-    criteria.labels = { $in: filterBy.labels };
+    criteria.labels = { $in: filterBy.labels }
   }
 
-  return criteria;
+  if (filterBy.checkIn && filterBy.checkOut) {
+    criteria.availableFrom = { $lte: new Date(filterBy.checkIn) }
+    criteria.availableTo = { $gte: new Date(filterBy.checkOut) }
+  }
+
+  return criteria
 }
 
 function _buildSort(filterBy) {
   const validFields = ["price", "capacity", "bedrooms", "bathrooms"];
   if (!filterBy.sortField || !validFields.includes(filterBy.sortField))
-    return {};
-  const dir = +filterBy.sortDir || 1; // 1 for ascending, -1 for descending
-  return { [filterBy.sortField]: dir };
+    return {}
+  const dir = +filterBy.sortDir || 1 // 1 for ascending, -1 for descending
+  return { [filterBy.sortField]: dir }
 }

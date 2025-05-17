@@ -30,6 +30,7 @@ async function query(filterBy = {}) {
     }
 
     const stays = await stayCursor.toArray();
+    console.log(stays);
     return stays;
   } catch (err) {
     logger.error("cannot find stays", err);
@@ -156,12 +157,25 @@ function _buildCriteria(filterBy) {
     criteria.capacity = { $gte: +filterBy.capacity };
   }
 
+  if (filterBy.guests) {
+    const totalGuests =
+      (filterBy.guests.adults || 0) + (filterBy.guests.children || 0);
+    if (totalGuests > 0) {
+      criteria.capacity = { $gte: totalGuests };
+    }
+  }
+
   if (filterBy.roomType) {
     criteria.roomType = filterBy.roomType;
   }
 
   if (filterBy.labels && filterBy.labels.length > 0) {
     criteria.labels = { $in: filterBy.labels };
+  }
+
+  if (filterBy.checkIn && filterBy.checkOut) {
+    criteria.availableFrom = { $lte: new Date(filterBy.checkIn) };
+    criteria.availableTo = { $gte: new Date(filterBy.checkOut) };
   }
 
   return criteria;

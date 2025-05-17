@@ -26,12 +26,14 @@ async function query(filterBy = {}) {
 
     const collection = await dbService.getCollection("stay")
     var stayCursor = await collection.find(criteria, { sort })
+   
 
     if (filterBy.pageIdx !== undefined) {
       stayCursor.skip(filterBy.pageIdx * PAGE_SIZE).limit(PAGE_SIZE)
     }
 
     const stays = await stayCursor.toArray()
+    console.log(stays)
     return stays
   } catch (err) {
     logger.error("cannot find stays", err)
@@ -134,7 +136,7 @@ function _buildCriteria(filterBy) {
     criteria.name = { $regex: filterBy.txt, $options: "i" }
   }
 
-  if (filterBy.city) {
+  if (filterBy.city) {  
     criteria["loc.city"] = { $regex: filterBy.city, $options: "i" }
   }
 
@@ -154,9 +156,9 @@ function _buildCriteria(filterBy) {
       criteria.price.$lte = +filterBy.maxPrice
   }
 
-//   if (filterBy.capacity !== undefined) {
-//     criteria.capacity = { $gte: +filterBy.capacity }
-//   }
+  if (filterBy.capacity !== undefined) {
+    criteria.capacity = { $gte: +filterBy.capacity }
+  }
 
   if (filterBy.guests) {
     const totalGuests = (filterBy.guests.adults || 0) + (filterBy.guests.children || 0)

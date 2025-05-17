@@ -33,6 +33,7 @@ export async function getReservationById(req, res) {
 export async function addReservation(req, res) {
   const { body: reservation } = req;
 
+  console.log(reservation);
   try {
     // reservation.owner = loggedinUser;
     const addedReservation = await reservationService.add(reservation);

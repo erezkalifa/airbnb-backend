@@ -8,20 +8,23 @@ export async function getStays(req, res) {
       minSpeed: +req.query.minSpeed || 0,
       sortField: req.query.sortField || "",
       sortDir: +req.query.sortDir || 1,
-      pageIdx: req.query.pageIdx ? +req.query.pageIdx : undefined,
+      page: +req.query.page || 1,
+      pageSize: +req.query.pageSize || 10,
       labels: _normalizeLabels(req.query.labels),
       city: req.query.city || "",
       checkIn: req.query.checkIn || "",
       checkOut: req.query.checkOut || "",
-      capacity:+req.query.capacity || 0,
-    }
-    const stays = await stayService.query(filterBy)
-    res.json(stays)
+      capacity: +req.query.capacity || 0,
+    };
+
+    const stays = await stayService.query(filterBy);
+    res.json(stays);
   } catch (err) {
-    logger.error("Failed to get stays", err)
-    res.status(400).send({ err: "Failed to get stays" })
+    logger.error("Failed to get stays", err);
+    res.status(400).send({ err: "Failed to get stays" });
   }
 }
+
 
 export async function getStayById(req, res) {
   try {

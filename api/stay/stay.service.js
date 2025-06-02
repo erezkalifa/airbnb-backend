@@ -23,14 +23,11 @@ async function query(filterBy = {}) {
     const sort = _buildSort(filterBy);
 
     const collection = await dbService.getCollection("stay");
-    var stayCursor = await collection.find(criteria, { sort });
 
-    if (filterBy.pageIdx !== undefined) {
-      stayCursor.skip(filterBy.pageIdx * PAGE_SIZE).limit(PAGE_SIZE);
-    }
+    const skip = (filterBy.page - 1) * filterBy.pageSize;
+    const cursor = collection.find(criteria).sort(sort).skip(skip).limit(filterBy.pageSize);
 
-    const stays = await stayCursor.toArray();
-    console.log(stays);
+    const stays = await cursor.toArray();
     return stays;
   } catch (err) {
     logger.error("cannot find stays", err);

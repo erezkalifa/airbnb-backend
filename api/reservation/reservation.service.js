@@ -54,17 +54,55 @@ async function remove(reservationId) {
   }
 }
 
-async function add(reservation) {
-  try {
-    const collection = await dbService.getCollection("reservation");
-    await collection.insertOne(reservation);
+// async function add(reservation) {
+//   try {
+//     const collection = await dbService.getCollection("reservation");
+//     await collection.insertOne(reservation);
 
-    return reservation;
+//     return reservation;
+//   } catch (err) {
+//     logger.error("cannot insert reservation", err);
+//     throw err;
+//   }
+// }
+
+async function add(reservation) {
+  const reservationToAdd = {
+    _id: new ObjectId(), // Explicitly create an ObjectId
+    stayId: reservation.stayId,
+    checkIn: reservation.checkIn,
+    checkOut: reservation.checkOut,
+    guests: reservation.guests,
+    totalPrice: reservation.totalPrice,
+    host: reservation.host,
+  };
+
+  // console.log("=== Prepared reservation to insert ===");
+  // console.log(reservationToAdd);
+
+  try {
+    // console.log("=== Attempting to get collection ===");
+    const collection = await dbService.getCollection("reservation");
+    // console.log("=== Got collection ===");
+    const result = await collection.insertOne(reservationToAdd);
+
+    // console.log("=== InsertOne result ===");
+    // console.log(result);
+
+    // if (result.acknowledged) {
+    //   console.log("Reservation added successfully:", reservationToAdd);
+    // } else {
+    //   console.log("Reservation insertion not acknowledged:", result);
+    // }
+
+
+    return reservationToAdd;
   } catch (err) {
     logger.error("cannot insert reservation", err);
     throw err;
   }
 }
+
 
 async function update(reservation) {
   //Need to check if updating is available

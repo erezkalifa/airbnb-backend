@@ -19,8 +19,8 @@ const router = express.Router();
 
 router.get("/", log, getReservations);
 router.get("/:id", log, getReservationById);
-router.post("/", log, addReservation);
-// router.post("/", log, requireAuth, addReservation);
+// router.post("/", log, addReservation);
+router.post("/", log, requireAuth, addReservation);
 router.put("/:id", updateReservation);
 // router.put("/:id", requireAuth, updateReservation);
 router.delete("/:id", removeReservation);

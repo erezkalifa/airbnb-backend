@@ -10,6 +10,7 @@ export const userService = {
   remove, // Delete (remove user)
   query, // List (of users)
   getByUsername, // Used for Login
+  addReservationToUser,
 };
 
 async function query(filterBy = {}) {
@@ -131,4 +132,22 @@ function _buildCriteria(filterBy) {
     criteria.score = { $gte: filterBy.minBalance };
   }
   return criteria;
+}
+
+export async function addReservationToUser(userId, reservation) {
+  try {
+    const collection = await dbService.getCollection("user");
+    await collection.updateOne(
+      { _id: ObjectId.createFromHexString(userId), reservations: { $exists: false } },
+      { $set: { reservations: [] } }
+    );
+
+    await collection.updateOne(
+      { _id: ObjectId.createFromHexString(userId) },
+      { $push: { reservations: reservation } }
+    );
+  } catch (err) {
+    logger.error(`Failed to add reservation to user ${userId}`, err);
+    throw err;
+  }
 }

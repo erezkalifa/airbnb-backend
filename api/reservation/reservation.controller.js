@@ -1,5 +1,6 @@
 import { logger } from "../../services/logger.service.js";
 import { reservationService } from "./reservation.service.js";
+import {userService} from "../user/user.service.js"
 
 export async function getReservations(req, res) {
   try {
@@ -32,11 +33,13 @@ export async function getReservationById(req, res) {
 
 export async function addReservation(req, res) {
   const { body: reservation } = req;
+  const { loggedinUser } = req; // Make sure you're using authentication middleware!
 
-  console.log(reservation);
   try {
-    // reservation.owner = loggedinUser;
     const addedReservation = await reservationService.add(reservation);
+    console.log("Received reservation:", reservation);
+    await userService.addReservationToUser(loggedinUser._id, addedReservation);
+
     res.json(addedReservation);
   } catch (err) {
     logger.error("Failed to add reservation", err);

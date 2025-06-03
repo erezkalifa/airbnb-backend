@@ -36,6 +36,10 @@ export async function addReservation(req, res) {
   const { loggedinUser } = req; // Make sure you're using authentication middleware!
 
   try {
+    console.log("loggedinUser:", loggedinUser);
+    reservation.guestId = loggedinUser._id;
+    reservation.guestName = loggedinUser.fullname;
+    console.log(reservation.guestName ,reservation.guestId)
     const addedReservation = await reservationService.add(reservation);
     console.log("Received reservation:", reservation);
     await userService.addReservationToUser(loggedinUser._id, addedReservation);

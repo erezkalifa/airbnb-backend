@@ -75,6 +75,8 @@ async function add(reservation) {
     guests: reservation.guests,
     totalPrice: reservation.totalPrice,
     host: reservation.host,
+    guestName: reservation.guestName,
+    gusetId: reservation.guestId,
   };
 
   // console.log("=== Prepared reservation to insert ===");

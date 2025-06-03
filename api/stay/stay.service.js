@@ -25,9 +25,25 @@ async function query(filterBy = {}) {
     const collection = await dbService.getCollection("stay");
 
     const skip = (filterBy.page - 1) * filterBy.pageSize;
-    const cursor = collection.find(criteria).sort(sort).skip(skip).limit(filterBy.pageSize);
 
-    const stays = await cursor.toArray();
+    // 🔎 Get the total number of matching stays
+    const totalMatches = await collection.countDocuments(criteria);
+    console.log("Total stays matching criteria:", totalMatches);
+
+    // 🔎 Check if the requested page has results
+    if (skip >= totalMatches) {
+      console.log("Requested page exceeds available data. Returning empty array.");
+      return [];
+    }
+
+    // ⚡ Get the paginated stays
+    const stays = await collection.find(criteria)
+      .sort(sort)
+      .skip(skip)
+      .limit(filterBy.pageSize)
+      .toArray();
+
+    console.log("Paginated stays:", stays);
     return stays;
   } catch (err) {
     logger.error("cannot find stays", err);
@@ -167,7 +183,8 @@ function _buildCriteria(filterBy) {
   }
 
   if (filterBy.labels && filterBy.labels.length > 0) {
-    criteria.labels = { $in: filterBy.labels };
+    const labels = Array.isArray(filterBy.labels) ? filterBy.labels : [filterBy.labels];
+    criteria.labels = { $in: labels };
   }
 
   if (filterBy.checkIn && filterBy.checkOut) {

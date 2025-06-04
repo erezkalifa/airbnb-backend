@@ -76,7 +76,7 @@ async function add(reservation) {
     totalPrice: reservation.totalPrice,
     host: reservation.host,
     guestName: reservation.guestName,
-    gusetId: reservation.guestId,
+    guestId: reservation.guestId,
   };
 
   // console.log("=== Prepared reservation to insert ===");
@@ -97,14 +97,12 @@ async function add(reservation) {
     //   console.log("Reservation insertion not acknowledged:", result);
     // }
 
-
     return reservationToAdd;
   } catch (err) {
     logger.error("cannot insert reservation", err);
     throw err;
   }
 }
-
 
 async function update(reservation) {
   //Need to check if updating is available

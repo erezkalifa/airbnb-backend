@@ -15,7 +15,10 @@ export async function getStays(req, res) {
       checkIn: req.query.checkIn || "",
       checkOut: req.query.checkOut || "",
       capacity: +req.query.capacity || 0,
+      ownerId: req.query.ownerId || "",
     };
+
+    // console.log(filterBy);
 
     const stays = await stayService.query(filterBy);
     res.json(stays);
@@ -25,10 +28,10 @@ export async function getStays(req, res) {
   }
 }
 
-
 export async function getStayById(req, res) {
   try {
     const stayId = req.params.id;
+
     const stay = await stayService.getById(stayId);
     res.json(stay);
   } catch (err) {
@@ -39,6 +42,8 @@ export async function getStayById(req, res) {
 
 export async function addStay(req, res) {
   const { loggedinUser, body: stay } = req;
+
+  // console.log(stay);
 
   try {
     stay.owner = loggedinUser;

@@ -20,6 +20,7 @@ export const stayService = {
 async function query(filterBy = {}) {
   try {
     const criteria = _buildCriteria(filterBy);
+    console.log(criteria);
     const sort = _buildSort(filterBy);
 
     const collection = await dbService.getCollection("stay");
@@ -28,22 +29,25 @@ async function query(filterBy = {}) {
 
     // 🔎 Get the total number of matching stays
     const totalMatches = await collection.countDocuments(criteria);
-    console.log("Total stays matching criteria:", totalMatches);
+    // console.log("Total stays matching criteria:", totalMatches);
 
     // 🔎 Check if the requested page has results
     if (skip >= totalMatches) {
-      console.log("Requested page exceeds available data. Returning empty array.");
+      console.log(
+        "Requested page exceeds available data. Returning empty array."
+      );
       return [];
     }
 
     // ⚡ Get the paginated stays
-    const stays = await collection.find(criteria)
+    const stays = await collection
+      .find(criteria)
       .sort(sort)
       .skip(skip)
       .limit(filterBy.pageSize)
       .toArray();
 
-    console.log("Paginated stays:", stays);
+    // console.log("Paginated stays:", stays);
     return stays;
   } catch (err) {
     logger.error("cannot find stays", err);
@@ -53,12 +57,13 @@ async function query(filterBy = {}) {
 
 async function getById(stayId) {
   try {
-    const criteria = { _id: stayId };
-
+    let criteria = { _id: ObjectId.createFromHexString(stayId) };
     const collection = await dbService.getCollection("stay");
-    const stay = await collection.findOne(criteria);
+    let stay = await collection.findOne(criteria);
+    if (!stay) {
+      stay = await collection.findOne({ _id: stayId });
+    }
 
-    //stay.createdAt = stay._id.getTimestamp()
     return stay;
   } catch (err) {
     logger.error(`while finding stay ${stayId}`, err);
@@ -84,6 +89,7 @@ async function remove(stayId) {
 }
 
 async function add(stay) {
+  console.log(stay);
   try {
     const collection = await dbService.getCollection("stay");
     await collection.insertOne(stay);
@@ -183,7 +189,9 @@ function _buildCriteria(filterBy) {
   }
 
   if (filterBy.labels && filterBy.labels.length > 0) {
-    const labels = Array.isArray(filterBy.labels) ? filterBy.labels : [filterBy.labels];
+    const labels = Array.isArray(filterBy.labels)
+      ? filterBy.labels
+      : [filterBy.labels];
     criteria.labels = { $in: labels };
   }
 
@@ -192,13 +200,27 @@ function _buildCriteria(filterBy) {
     criteria.availableTo = { $gte: new Date(filterBy.checkOut) };
   }
 
+  if (filterBy.ownerId) {
+    criteria["owner._id"] = filterBy.ownerId;
+  }
+
   return criteria;
 }
 
 function _buildSort(filterBy) {
   const validFields = ["price", "capacity", "bedrooms", "bathrooms"];
-  if (!filterBy.sortField || !validFields.includes(filterBy.sortField))
-    return {};
-  const dir = +filterBy.sortDir || 1; // 1 for ascending, -1 for descending
-  return { [filterBy.sortField]: dir };
+  const dir = +filterBy.sortDir || -1;
+
+  if (filterBy.sortField && validFields.includes(filterBy.sortField)) {
+    return { [filterBy.sortField]: dir };
+  }
+  return { _id: -1 };
+}
+
+function _criteriaValidation(isValid = false) {
+  if (isValid) {
+    return { _id: ObjectId.createFromHexString(stayId) };
+  } else {
+    return { _id: stayId };
+  }
 }

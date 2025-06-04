@@ -1,6 +1,6 @@
 import { logger } from "../../services/logger.service.js";
 import { reservationService } from "./reservation.service.js";
-import {userService} from "../user/user.service.js"
+import { userService } from "../user/user.service.js";
 
 export async function getReservations(req, res) {
   try {
@@ -39,7 +39,7 @@ export async function addReservation(req, res) {
     console.log("loggedinUser:", loggedinUser);
     reservation.guestId = loggedinUser._id;
     reservation.guestName = loggedinUser.fullname;
-    console.log(reservation.guestName ,reservation.guestId)
+    console.log(reservation.guestName, reservation.guestId);
     const addedReservation = await reservationService.add(reservation);
     console.log("Received reservation:", reservation);
     await userService.addReservationToUser(loggedinUser._id, addedReservation);

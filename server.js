@@ -20,20 +20,20 @@ const server = http.createServer(app);
 app.use(cookieParser());
 app.use(express.json());
 
-// if (process.env.NODE_ENV === "production") {
-//   app.use(express.static(path.resolve("public")));
-// } else {
-//     const corsOptions = {
-//         origin: [
-//             'http://127.0.0.1:3030',
-//             'http://localhost:3030',
-//             'http://127.0.0.1:5173',
-//             'http://localhost:5173'
-//         ],
-//         credentials: true
-//     }
-//     app.use(cors(corsOptions))
-// }
+if (process.env.NODE_ENV === "production") {
+  app.use(express.static(path.resolve("public")));
+} else {
+  const corsOptions = {
+    origin: [
+      "http://127.0.0.1:3030",
+      "http://localhost:3030",
+      "http://127.0.0.1:5173",
+      "http://localhost:5173",
+    ],
+    credentials: true,
+  };
+  app.use(cors(corsOptions));
+}
 
 const corsOptions = {
   origin: [
@@ -43,8 +43,8 @@ const corsOptions = {
       'http://localhost:5173',
       'https://airbnb-project-eef2.onrender.com'
   ],
-  credentials: true
-}
+  credentials: true,
+};
 
 app.use(cors(corsOptions));
 
@@ -52,8 +52,7 @@ if (process.env.NODE_ENV === "production") {
   app.use(express.static(path.resolve("public")));
 }
 
-
-app.all('/*all', setupAsyncLocalStorage)
+app.all("/*all", setupAsyncLocalStorage);
 
 app.use("/api/auth", authRoutes);
 app.use("/api/user", userRoutes);

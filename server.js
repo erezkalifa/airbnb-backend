@@ -40,7 +40,8 @@ const corsOptions = {
       'http://127.0.0.1:3030',
       'http://localhost:3030',
       'http://127.0.0.1:5173',
-      'http://localhost:5173'
+      'http://localhost:5173',
+      'https://airbnb-project-eef2.onrender.com'
   ],
   credentials: true
 }

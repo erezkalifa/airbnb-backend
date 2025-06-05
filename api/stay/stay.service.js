@@ -39,13 +39,16 @@ async function query(filterBy = {}) {
       return [];
     }
 
-    // ⚡ Get the paginated stays
     const stays = await collection
-      .find(criteria)
-      .sort(sort)
-      .skip(skip)
-      .limit(filterBy.pageSize)
-      .toArray();
+      .find(criteria).toArray();
+
+    // ⚡ Get the paginated stays
+    // const stays = await collection
+    //   .find(criteria)
+    //   .sort(sort)
+    //   .skip(skip)
+    //   .limit(filterBy.pageSize)
+    //   .toArray();
 
     // console.log("Paginated stays:", stays);
     return stays;
